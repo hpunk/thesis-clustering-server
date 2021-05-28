@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+flask-sqlalchemy = "*"
+flask-restful = "*"
+flask-migrate = "*"
+psycopg2-binary = "*"
+scikit-learn-extra = "*"
+scipy = "*"
+scikit-learn = "*"
+plotly = "*"
+chart-studio = "*"
+numpy = "*"
+pandas = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
