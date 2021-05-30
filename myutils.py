@@ -1,3 +1,39 @@
+def get_clustering_columns():
+    return [
+            'informant',
+            'enter_type',
+            'victim_sex',
+            'daughters_number',
+            'sons_number',
+            'victim_ethnicity',
+            'residence_area',
+            'victim_civil_state',
+            'education_level_victim',
+            'victim_works',
+            'victim_aggr_link',
+            'aggr_lives_w_victim',
+            'aggr_sex',
+            'report_registered',
+            'violence_type',
+            'aggr_consume_alcoh',
+            'victim_age',
+            'physical_aggr',
+            'psychological_aggr',
+            'economical_aggr',
+            'sexual_aggr'
+        ]
+
+def generate_query_for_clustering(start_date,end_date,state,province,district):
+    query = "SELECT * FROM public.clustering_data where "
+    query += "case_date >= "+start_date+" and case_date < "+end_date+" "
+    if(district!=0):
+        query += " and district="+str(district)+" "
+    elif(province!=0):
+        query += " and province="+str(province)+" "
+    elif(state!=0):
+        query += " and state="+str(state)+" "
+    return query
+
 def distance_function(caseA,caseB):
     columns = [
         'informant',
