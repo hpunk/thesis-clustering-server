@@ -16,6 +16,7 @@ plotly = "*"
 chart-studio = "*"
 numpy = "*"
 pandas = "*"
+flask-cors = "*"
 
 [dev-packages]
 

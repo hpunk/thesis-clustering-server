@@ -2,8 +2,9 @@ from flask import Flask,render_template,request, Response
 from flask_migrate import Migrate
 from sqlalchemy import func, create_engine
 from myutils import distance_function, get_clustering_columns, generate_query_for_clustering
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN,AgglomerativeClustering
 from sklearn_extra.cluster import KMedoids
+from flask_cors import CORS, cross_origin
 from sklearn import manifold
 from scipy.spatial.distance import squareform
 import plotly.express as px
@@ -18,8 +19,10 @@ import pandas as pd
 import numpy as np
 
 app = Flask(__name__)
+CORS(app, support_credentials=True)
 
 @app.route('/hello')
+@cross_origin(supports_credentials=True)
 def hello_flask():
     df = pd.DataFrame(
         [["a", "b"], ["c", "d"]],
@@ -29,10 +32,11 @@ def hello_flask():
     return {'data' : json.loads(df.to_json(orient="records"))}
 
 @app.route('/clustering/count', methods = ['GET'])
+@cross_origin(supports_credentials=True)
 def count_data_to_cluster():
-    state = request.args.get('st')
-    province = request.args.get('pr')
-    district = request.args.get('di')
+    state = int(request.args.get('st'))
+    province = int(request.args.get('pr'))
+    district = int(request.args.get('di'))
     start_date = request.args.get('sd')
     end_date = request.args.get('ed')
     #connection
@@ -42,10 +46,11 @@ def count_data_to_cluster():
     return { 'count' : len(data_df['id']) }
 
 @app.route('/clustering/hierarchical-to-scatter', methods = ['GET'])
+@cross_origin(supports_credentials=True)
 def dendro_to_scatter():
-    state = request.args.get('st')
-    province = request.args.get('pr')
-    district = request.args.get('di')
+    state = int(request.args.get('st'))
+    province = int(request.args.get('pr'))
+    district = int(request.args.get('di'))
     start_date = request.args.get('sd')
     end_date = request.args.get('ed')
     k = request.args.get('k')
@@ -62,6 +67,9 @@ def dendro_to_scatter():
         for j in range(i+1,len(data_matrix)):
             vector_distance.append(distance_function(data_matrix[i],data_matrix[j]))
     distance_matrix = squareform(vector_distance)
+
+    hc = AgglomerativeClustering(n_clusters = int(k), affinity = 'precomputed', linkage = 'average')
+    #Z = linkage(vector_distance, 'average')
     #convert to array
     adist = np.array(distance_matrix)
     #we reduce dimentions to 3 for plotting
@@ -70,7 +78,8 @@ def dendro_to_scatter():
 
     coords = results.embedding_
     
-    labels = fcluster(Z, t=int(k), criterion='maxclust')
+    #labels = fcluster(Z, t=int(k), criterion='maxclust')
+    labels = hc.fit_predict(distance_matrix)
     str_labels = []
     for label in labels:
         str_labels.append(str(label))
@@ -95,10 +104,11 @@ def dendro_to_scatter():
 
 
 @app.route('/clustering', methods = ['GET'])
+@cross_origin(supports_credentials=True)
 def cluster_data():
-    state = request.args.get('st')
-    province = request.args.get('pr')
-    district = request.args.get('di')
+    state = int(request.args.get('st'))
+    province = int(request.args.get('pr'))
+    district = int(request.args.get('di'))
     start_date = request.args.get('sd')
     end_date = request.args.get('ed')
     algorithm = request.args.get('alg')
@@ -127,7 +137,7 @@ def cluster_data():
     #kmedoids and dbscan
     if(algorithm == "0" or algorithm == "1"):
         #clustering
-        clusters = KMedoids(n_clusters=int(k),metric=distance_function,random_state=0).fit(data_matrix) if algorithm=="0" else DBSCAN(min_samples=int(mins), metric=distance_function, eps=int(eps), p=1).fit(data_matrix)
+        clusters = KMedoids(n_clusters=int(k),metric=distance_function,random_state=0).fit(data_matrix) if algorithm=="0" else DBSCAN(min_samples=int(mins), metric=distance_function, eps=float(eps), p=1).fit(data_matrix)
         labels = clusters.labels_
         adist = np.array(distance_matrix)
         #dimention reduced to 3 for plotting
@@ -162,7 +172,7 @@ def cluster_data():
         #plotting
         fig = ff.create_dendrogram(Z)
         #dendrogram
-        fig.update_layout(width=800, height=500)
+        #fig.update_layout({'width'=900, 'height'=800})
         py.plot(fig, filename = "dendrogram_thesis", auto_open=False)
         #return value so front end can render dendrogram
         return { 'response' : 1 }
@@ -170,4 +180,4 @@ def cluster_data():
         
  
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
