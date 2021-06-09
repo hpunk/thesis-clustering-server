@@ -1,7 +1,7 @@
 from flask import Flask,render_template,request, Response
 from flask_migrate import Migrate
 from sqlalchemy import func, create_engine
-from myutils import distance_function, get_clustering_columns, generate_query_for_clustering
+from myutils import distance_function, get_clustering_columns, generate_query_for_clustering, generate_df_with_labels
 from sklearn.cluster import DBSCAN,AgglomerativeClustering
 from sklearn_extra.cluster import KMedoids
 from flask_cors import CORS, cross_origin
@@ -91,12 +91,13 @@ def dendro_to_scatter():
     #data to retrieve
     response_df = data_df.assign(label=labels)
     response_df = response_df.drop(['id'], axis = 1)
-
+    print('añito ', int(start_date[0:4]))
+    response_df = generate_df_with_labels(response_df,int(start_date[0:4]))
     unique_labels = list(set(labels))
 
     data = []
     for label in unique_labels:
-        data.append({ 'group': str(label), 'data': json.loads(response_df[response_df['label']==label].to_json(orient="records")) })
+        data.append({ 'group': str(label), 'data': json.loads(response_df[response_df['00_grupo']==label].to_json(orient="records")) })
 
     return {'response' : data}
 
@@ -156,12 +157,13 @@ def cluster_data():
         #data to retrieve
         response_df = data_df.assign(label=labels)
         response_df = response_df.drop(['id'], axis = 1)
-
+        print('añito ', int(start_date[0:4]))
+        response_df = generate_df_with_labels(response_df,int(start_date[0:4]))
         unique_labels = list(set(labels))
 
         data = []
         for label in unique_labels:
-            data.append({ 'group': str(label), 'data': json.loads(response_df[response_df['label']==label].to_json(orient="records")) })
+            data.append({ 'group': str(label), 'data': json.loads(response_df[response_df['00_grupo']==label].to_json(orient="records")) })
 
         return {'response' : data}
 
