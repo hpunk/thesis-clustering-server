@@ -40,7 +40,8 @@ def count_data_to_cluster():
     start_date = request.args.get('sd')
     end_date = request.args.get('ed')
     #connection
-    engine = create_engine('postgresql://postgres:p0stgr3SQL,@localhost:5432/thesis_local')
+    ssl_args = {'sslrootcert': './server-ca.pem', 'sslcert':'./client-cert.pem', 'sslkey':'client-key.pem'}
+    engine = create_engine('postgresql://postgres:p0stgr3SQL,@34.122.182.215:5432/thesis_local', connect_args=ssl_args)
     query = generate_query_for_clustering(start_date,end_date,state,province,district)
     data_df = pd.read_sql_query(query,con=engine)
     return { 'count' : len(data_df['id']) }
@@ -55,7 +56,8 @@ def dendro_to_scatter():
     end_date = request.args.get('ed')
     k = request.args.get('k')
     #connection
-    engine = create_engine('postgresql://postgres:p0stgr3SQL,@localhost:5432/thesis_local')
+    ssl_args = {'sslrootcert': './server-ca.pem', 'sslcert':'./client-cert.pem', 'sslkey':'client-key.pem'}
+    engine = create_engine('postgresql://postgres:p0stgr3SQL,@34.122.182.215:5432/thesis_local',connect_args=ssl_args)
     query = generate_query_for_clustering(start_date,end_date,state,province,district)
     #get data
     data_df = pd.read_sql_query(query,con=engine)
@@ -122,7 +124,8 @@ def cluster_data():
 
     chart_studio.tools.set_credentials_file(username=username, api_key=apikey)
     #db connection
-    engine = create_engine('postgresql://postgres:p0stgr3SQL,@localhost:5432/thesis_local')
+    ssl_args = {'sslrootcert': './server-ca.pem', 'sslcert':'./client-cert.pem', 'sslkey':'client-key.pem'}
+    engine = create_engine('postgresql://postgres:p0stgr3SQL,@34.122.182.215:5432/thesis_local',connect_args=ssl_args)
     query = generate_query_for_clustering(start_date,end_date,state,province,district)
     #extract data
     data_df = pd.read_sql_query(query,con=engine)
