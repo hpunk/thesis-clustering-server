@@ -1,6 +1,5 @@
 from flask import Flask,render_template,request, Response
-from flask_migrate import Migrate
-from sqlalchemy import func, create_engine
+from sqlalchemy import create_engine
 from myutils import distance_function, get_clustering_columns, generate_query_for_clustering, generate_df_with_labels
 from sklearn.cluster import DBSCAN,AgglomerativeClustering
 from sklearn_extra.cluster import KMedoids
