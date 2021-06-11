@@ -1,9 +1,8 @@
-from flask import Flask,render_template,request, Response
+from fastapi import FastAPI
 from sqlalchemy import create_engine
 from myutils import distance_function, get_clustering_columns, generate_query_for_clustering, generate_df_with_labels
 from sklearn.cluster import DBSCAN,AgglomerativeClustering
 from sklearn_extra.cluster import KMedoids
-from flask_cors import CORS, cross_origin
 from sklearn import manifold
 from scipy.spatial.distance import squareform
 import plotly.express as px
@@ -17,11 +16,9 @@ import json
 import pandas as pd
 import numpy as np
 
-app = Flask(__name__)
-CORS(app, support_credentials=True)
+app = FastAPI()
 
-@app.route('/hello')
-@cross_origin(supports_credentials=True)
+@app.get('/hello')
 def hello_flask():
     df = pd.DataFrame(
         [["a", "b"], ["c", "d"]],
@@ -30,14 +27,13 @@ def hello_flask():
     )
     return {'data' : json.loads(df.to_json(orient="records"))}
 
-@app.route('/clustering/count', methods = ['GET'])
-@cross_origin(supports_credentials=True)
-def count_data_to_cluster():
-    state = int(request.args.get('st'))
-    province = int(request.args.get('pr'))
-    district = int(request.args.get('di'))
-    start_date = request.args.get('sd')
-    end_date = request.args.get('ed')
+@app.get('/clustering/count')
+def count_data_to_cluster(st: int, pr : int, di : int, sd : str, ed : str):
+    state = st
+    province = pr
+    district = di
+    start_date = sd
+    end_date = ed
     #connection
     ssl_args = {'sslrootcert': './server-ca.pem', 'sslcert':'./client-cert.pem', 'sslkey':'client-key.pem'}
     engine = create_engine('postgresql://postgres:p0stgr3SQL,@34.122.182.215:5432/thesis_local', connect_args=ssl_args)
@@ -45,15 +41,13 @@ def count_data_to_cluster():
     data_df = pd.read_sql_query(query,con=engine)
     return { 'count' : len(data_df['id']) }
 
-@app.route('/clustering/hierarchical-to-scatter', methods = ['GET'])
-@cross_origin(supports_credentials=True)
-def dendro_to_scatter():
-    state = int(request.args.get('st'))
-    province = int(request.args.get('pr'))
-    district = int(request.args.get('di'))
-    start_date = request.args.get('sd')
-    end_date = request.args.get('ed')
-    k = request.args.get('k')
+@app.get('/clustering/hierarchical-to-scatter')
+def dendro_to_scatter(st: int, pr : int, di : int, sd : str, ed : str, k : int):
+    state = st
+    province = pr
+    district = di
+    start_date = sd
+    end_date = ed
     #connection
     ssl_args = {'sslrootcert': './server-ca.pem', 'sslcert':'./client-cert.pem', 'sslkey':'client-key.pem'}
     engine = create_engine('postgresql://postgres:p0stgr3SQL,@34.122.182.215:5432/thesis_local',connect_args=ssl_args)
@@ -105,18 +99,15 @@ def dendro_to_scatter():
     
 
 
-@app.route('/clustering', methods = ['GET'])
-@cross_origin(supports_credentials=True)
-def cluster_data():
-    state = int(request.args.get('st'))
-    province = int(request.args.get('pr'))
-    district = int(request.args.get('di'))
-    start_date = request.args.get('sd')
-    end_date = request.args.get('ed')
-    algorithm = request.args.get('alg')
-    k = request.args.get('k')
-    mins = request.args.get('mins')
-    eps = request.args.get('eps')
+@app.get('/clustering')
+def cluster_data(st: int, pr : int, di : int, sd : str, ed : str, k : int, mins : int, eps : float,alg : str):
+    state = st
+    province = pr
+    district = di
+    start_date = sd
+    end_date = ed
+    algorithm = alg
+
     #plotly
     username = "gustavo_alzamora_2021"
     apikey = "CSK3qWiFL9D29z8bjBLH"
@@ -180,8 +171,3 @@ def cluster_data():
         py.plot(fig, filename = "dendrogram_thesis", auto_open=False)
         #return value so front end can render dendrogram
         return { 'response' : 1 }
-
-        
- 
-if __name__ == '__main__':
-    app.run(debug=False)

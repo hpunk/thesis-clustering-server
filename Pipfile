@@ -4,8 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
-flask-sqlalchemy = "*"
 psycopg2-binary = "*"
 scikit-learn-extra = "*"
 scipy = "*"
@@ -14,9 +12,14 @@ plotly = "*"
 chart-studio = "*"
 numpy = "*"
 pandas = "*"
-flask-cors = "*"
+fastapi = "*"
+sqlalchemy = "*"
+gunicorn = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.8"
+
+[packages.uvicorn]
+extras = [ "standard",]
