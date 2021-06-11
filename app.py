@@ -91,7 +91,6 @@ def dendro_to_scatter():
     #data to retrieve
     response_df = data_df.assign(label=labels)
     response_df = response_df.drop(['id'], axis = 1)
-    print('añito ', int(start_date[0:4]))
     response_df = generate_df_with_labels(response_df,int(start_date[0:4]))
     unique_labels = list(set(labels))
 
@@ -157,7 +156,6 @@ def cluster_data():
         #data to retrieve
         response_df = data_df.assign(label=labels)
         response_df = response_df.drop(['id'], axis = 1)
-        print('añito ', int(start_date[0:4]))
         response_df = generate_df_with_labels(response_df,int(start_date[0:4]))
         unique_labels = list(set(labels))
 
