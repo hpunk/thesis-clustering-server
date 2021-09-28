@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from sqlalchemy import create_engine
 from myutils import distance_function, get_clustering_columns, generate_query_for_clustering, generate_df_with_labels
 from sklearn.cluster import DBSCAN,AgglomerativeClustering
@@ -8,18 +9,18 @@ from scipy.spatial.distance import squareform
 import plotly.express as px
 import chart_studio
 import chart_studio.plotly as py
-import chart_studio.tools as tls
 import plotly.figure_factory as ff
-from scipy.cluster.hierarchy import fcluster
 from scipy.cluster.hierarchy import linkage
 import json
 import pandas as pd
 import numpy as np
 
 app = FastAPI()
+max_number_cases = 380
+database_connection_string = 'postgresql://postgres:p0stgr3SQL,@localhost:5432/thesis_local'
 
 @app.get('/hello')
-def hello_flask():
+def hello_fastapi():
     df = pd.DataFrame(
         [["a", "b"], ["c", "d"]],
         index=["row 1", "row 2"],
@@ -36,7 +37,7 @@ def count_data_to_cluster(st: int, pr : int, di : int, sd : str, ed : str):
     end_date = ed
     #connection
     ssl_args = {'sslrootcert': './server-ca.pem', 'sslcert':'./client-cert.pem', 'sslkey':'client-key.pem'}
-    engine = create_engine('postgresql://postgres:p0stgr3SQL,@34.122.182.215:5432/thesis_local', connect_args=ssl_args)
+    engine = create_engine(database_connection_string, connect_args=ssl_args)
     query = generate_query_for_clustering(start_date,end_date,state,province,district)
     data_df = pd.read_sql_query(query,con=engine)
     return { 'count' : len(data_df['id']) }
@@ -50,10 +51,14 @@ def dendro_to_scatter(st: int, pr : int, di : int, sd : str, ed : str, k : int):
     end_date = ed
     #connection
     ssl_args = {'sslrootcert': './server-ca.pem', 'sslcert':'./client-cert.pem', 'sslkey':'client-key.pem'}
-    engine = create_engine('postgresql://postgres:p0stgr3SQL,@34.122.182.215:5432/thesis_local',connect_args=ssl_args)
+    engine = create_engine(database_connection_string,connect_args=ssl_args)
     query = generate_query_for_clustering(start_date,end_date,state,province,district)
+    
+
     #get data
     data_df = pd.read_sql_query(query,con=engine)
+    if(len(data_df) > max_number_cases):
+        data_df = data_df.sample(n=max_number_cases, ignore_index=True)
     data_to_cluster_df = data_df[get_clustering_columns()]
     data_matrix = data_to_cluster_df.values
     #distance vector
@@ -114,10 +119,14 @@ def cluster_data(st: int, pr : int, di : int, sd : str, ed : str, k : int, mins 
     chart_studio.tools.set_credentials_file(username=username, api_key=apikey)
     #db connection
     ssl_args = {'sslrootcert': './server-ca.pem', 'sslcert':'./client-cert.pem', 'sslkey':'client-key.pem'}
-    engine = create_engine('postgresql://postgres:p0stgr3SQL,@34.122.182.215:5432/thesis_local',connect_args=ssl_args)
+    engine = create_engine(database_connection_string,connect_args=ssl_args)
     query = generate_query_for_clustering(start_date,end_date,state,province,district)
     #extract data
     data_df = pd.read_sql_query(query,con=engine)
+    print(len(data_df))
+    if(len(data_df) > max_number_cases):
+        data_df = data_df.sample(n=max_number_cases, ignore_index=True)
+    print(len(data_df))
     data_to_cluster_df = data_df[get_clustering_columns()]
     data_matrix = data_to_cluster_df.values
     #distance vector
@@ -169,3 +178,4 @@ def cluster_data(st: int, pr : int, di : int, sd : str, ed : str, k : int, mins 
         py.plot(fig, filename = "dendrogram_thesis", auto_open=False)
         #return value so front end can render dendrogram
         return { 'response' : 1 }
+    
