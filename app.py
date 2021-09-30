@@ -17,7 +17,7 @@ import numpy as np
 
 app = FastAPI()
 max_number_cases = 380
-database_connection_string = 'postgresql://postgres:p0stgr3SQL,@localhost:5432/thesis_local'
+database_connection_string = 'postgresql://postgres:p0stgr3SQL,@34.67.249.1:5432/postgres'
 
 @app.get('/hello')
 def hello_fastapi():
