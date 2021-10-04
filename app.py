@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
 from myutils import distance_function, get_clustering_columns, generate_query_for_clustering, generate_df_with_labels
 from sklearn.cluster import DBSCAN,AgglomerativeClustering
@@ -16,8 +16,25 @@ import pandas as pd
 import numpy as np
 
 app = FastAPI()
+
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8000",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 max_number_cases = 380
-database_connection_string = 'postgresql://postgres:p0stgr3SQL,@34.67.249.1:5432/postgres'
+database_connection_string = 'postgresql://postgres:p0stgr3SQL,@localhost/thesis_local'
 
 @app.get('/hello')
 def hello_fastapi():
