@@ -11,6 +11,7 @@ import chart_studio
 import chart_studio.plotly as py
 import plotly.figure_factory as ff
 from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import fclusterdata
 import json
 import pandas as pd
 import numpy as np
@@ -84,8 +85,8 @@ def dendro_to_scatter(st: int, pr : int, di : int, sd : str, ed : str, k : int):
         for j in range(i+1,len(data_matrix)):
             vector_distance.append(distance_function(data_matrix[i],data_matrix[j]))
     distance_matrix = squareform(vector_distance)
-
-    hc = AgglomerativeClustering(n_clusters = int(k), affinity = 'precomputed', linkage = 'average')
+    print(distance_matrix)
+    #hc = AgglomerativeClustering(n_clusters= int(k), affinity = 'precomputed', linkage = 'average', distance_threshold=None)
     #Z = linkage(vector_distance, 'average')
     #convert to array
     adist = np.array(distance_matrix)
@@ -95,8 +96,9 @@ def dendro_to_scatter(st: int, pr : int, di : int, sd : str, ed : str, k : int):
 
     coords = results.embedding_
     
+    labels = fclusterdata(X = data_matrix, metric = distance_function, method = 'average', t=int(k))
     #labels = fcluster(Z, t=int(k), criterion='maxclust')
-    labels = hc.fit_predict(distance_matrix)
+    #labels = hc.fit(distance_matrix).labels_
     str_labels = []
     for label in labels:
         str_labels.append(str(label))
@@ -140,10 +142,8 @@ def cluster_data(st: int, pr : int, di : int, sd : str, ed : str, k : int, mins 
     query = generate_query_for_clustering(start_date,end_date,state,province,district)
     #extract data
     data_df = pd.read_sql_query(query,con=engine)
-    print(len(data_df))
     if(len(data_df) > max_number_cases):
         data_df = data_df.sample(n=max_number_cases, ignore_index=True)
-    print(len(data_df))
     data_to_cluster_df = data_df[get_clustering_columns()]
     data_matrix = data_to_cluster_df.values
     #distance vector
