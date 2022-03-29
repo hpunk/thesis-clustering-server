@@ -70,6 +70,7 @@ pytest = "*"
 coverage = "*"
 pandas = "==1.3.3"
 pytest-cov = "*"
+matplotlib = "*"
 
 [dev-packages]
 

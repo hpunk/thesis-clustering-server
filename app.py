@@ -11,7 +11,7 @@ import chart_studio
 import chart_studio.plotly as py
 import plotly.figure_factory as ff
 from scipy.cluster.hierarchy import linkage
-from scipy.cluster.hierarchy import fclusterdata
+from scipy.cluster.hierarchy import fclusterdata, fcluster
 import json
 import pandas as pd
 import numpy as np
@@ -35,7 +35,7 @@ app.add_middleware(
 )
 
 max_number_cases = 380
-database_connection_string = 'postgresql://postgres:p0stgr3SQL,@localhost/thesis_local'
+database_connection_string = 'postgresql://postgres:p0stgr3SQL,@localhost:5432/thesis_local'
 
 @app.get('/hello')
 def hello_fastapi():
@@ -85,9 +85,8 @@ def dendro_to_scatter(st: int, pr : int, di : int, sd : str, ed : str, k : int):
         for j in range(i+1,len(data_matrix)):
             vector_distance.append(distance_function(data_matrix[i],data_matrix[j]))
     distance_matrix = squareform(vector_distance)
-    print(distance_matrix)
-    #hc = AgglomerativeClustering(n_clusters= int(k), affinity = 'precomputed', linkage = 'average', distance_threshold=None)
-    #Z = linkage(vector_distance, 'average')
+    #hc = AgglomerativeClustering(n_clusters= None, affinity = 'precomputed', linkage = 'average', distance_threshold=0.3)
+    Z = linkage(vector_distance, 'average')
     #convert to array
     adist = np.array(distance_matrix)
     #we reduce dimentions to 3 for plotting
@@ -95,13 +94,13 @@ def dendro_to_scatter(st: int, pr : int, di : int, sd : str, ed : str, k : int):
     results = mds.fit(adist)
 
     coords = results.embedding_
-    
-    labels = fclusterdata(X = data_matrix, metric = distance_function, method = 'average', t=int(k))
-    #labels = fcluster(Z, t=int(k), criterion='maxclust')
+    #labels = fclusterdata(X = data_matrix, metric = distance_function, method = 'ward', t=k)
+    labels = fcluster(Z, t=Z[len(Z)-k][2]+0.0001, criterion='distance')
     #labels = hc.fit(distance_matrix).labels_
     str_labels = []
     for label in labels:
         str_labels.append(str(label))
+    
     cluster_df = { 'x' : coords[:, 0], 'y' : coords[:, 1], 'z' : coords[:, 2], 'color': str_labels}
     df = pd.DataFrame(cluster_df)
     #scatterplot
