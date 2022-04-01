@@ -10,11 +10,12 @@ import plotly.express as px
 import chart_studio
 import chart_studio.plotly as py
 import plotly.figure_factory as ff
-from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import linkage, dendrogram
 from scipy.cluster.hierarchy import fclusterdata, fcluster
 import json
 import pandas as pd
 import numpy as np
+
 
 app = FastAPI()
 
@@ -95,17 +96,19 @@ def dendro_to_scatter(st: int, pr : int, di : int, sd : str, ed : str, k : int):
 
     coords = results.embedding_
     #labels = fclusterdata(X = data_matrix, metric = distance_function, method = 'ward', t=k)
-    labels = fcluster(Z, t=Z[len(Z)-k][2]+0.0001, criterion='distance')
+    labels = fcluster(Z, t=Z[len(Z)-k][2], criterion='distance')
     #labels = hc.fit(distance_matrix).labels_
     str_labels = []
     for label in labels:
-        str_labels.append(str(label))
+        str_labels.append("Grupo "+str(label))
     
     cluster_df = { 'x' : coords[:, 0], 'y' : coords[:, 1], 'z' : coords[:, 2], 'color': str_labels}
     df = pd.DataFrame(cluster_df)
     #scatterplot
     fig = px.scatter_3d(df, x='x', y='y', z='z', color='color')
+    fig.update_layout(title_text='Diagrama de dispersión para visualizar grupos encontrados')
     py.plot(fig, filename = "scatterplot_thesis", auto_open=False)
+
     #data to retrieve
     response_df = data_df.assign(label=labels)
     response_df = response_df.drop(['id'], axis = 1)
@@ -165,11 +168,14 @@ def cluster_data(st: int, pr : int, di : int, sd : str, ed : str, k : int, mins 
         coords = results.embedding_
         str_labels = []
         for label in labels:
-            str_labels.append(str(label))
+            if(label != -1):
+                str_labels.append("Grupo "+str(label))
+            else:
+                str_labels.append("Sin grupo")
         cluster_df = { 'x' : coords[:, 0], 'y' : coords[:, 1], 'z' : coords[:, 2], 'color':str_labels}
         df = pd.DataFrame(cluster_df)
         fig = px.scatter_3d(df, x='x', y='y', z='z', color='color')
-
+        fig.update_layout(title_text='Diagrama de dispersión para visualizar grupos encontrados')
         py.plot(fig, filename = "scatterplot_thesis", auto_open=False)
         #data to retrieve
         response_df = data_df.assign(label=labels)
