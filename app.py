@@ -178,14 +178,14 @@ def cluster_data(st: int, pr : int, di : int, sd : str, ed : str, k : int, mins 
         fig.update_layout(title_text='Diagrama de dispersión para visualizar grupos encontrados')
         py.plot(fig, filename = "scatterplot_thesis", auto_open=False)
         #data to retrieve
-        response_df = data_df.assign(label=labels)
+        response_df = data_df.assign(label=str_labels)
         response_df = response_df.drop(['id'], axis = 1)
         response_df = generate_df_with_labels(response_df,int(start_date[0:4]))
-        unique_labels = list(set(labels))
+        unique_labels = list(set(str_labels))
 
         data = []
         for label in unique_labels:
-            data.append({ 'group': str(label), 'data': json.loads(response_df[response_df['00_grupo']==label].to_json(orient="records")) })
+            data.append({ 'group': label, 'data': json.loads(response_df[response_df['00_grupo']==label].to_json(orient="records")) })
 
         return {'response' : data}
 
