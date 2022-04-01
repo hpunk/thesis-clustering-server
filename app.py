@@ -36,7 +36,12 @@ app.add_middleware(
 )
 
 max_number_cases = 380
-database_connection_string = 'postgresql://postgres:p0stgr3SQL,@localhost:5432/thesis_local'
+
+#localhost
+#database_connection_string = 'postgresql://postgres:p0stgr3SQL,@localhost:5432/thesis_local'
+#deploy
+database_connection_string = 'postgres://ia_user:CalidadAire2020@air-quality-db.ckvmz9vdajd7.us-east-1.rds.amazonaws.com:5432/thesis_local'
+
 
 @app.get('/hello')
 def hello_fastapi():
