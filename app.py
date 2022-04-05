@@ -40,7 +40,7 @@ max_number_cases = 380
 #localhost
 #database_connection_string = 'postgresql://postgres:p0stgr3SQL,@localhost:5432/postgres'
 #deploy
-database_connection_string = 'postgres://ia_user:CalidadAire2020@air-quality-db.ckvmz9vdajd7.us-east-1.rds.amazonaws.com:5432/thesis_local'
+database_connection_string = ''
 
 
 @app.get('/hello')
