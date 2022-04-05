@@ -38,7 +38,7 @@ app.add_middleware(
 max_number_cases = 380
 
 #localhost
-#database_connection_string = 'postgresql://postgres:p0stgr3SQL,@localhost:5432/thesis_local'
+#database_connection_string = 'postgresql://postgres:p0stgr3SQL,@localhost:5432/postgres'
 #deploy
 database_connection_string = 'postgres://ia_user:CalidadAire2020@air-quality-db.ckvmz9vdajd7.us-east-1.rds.amazonaws.com:5432/thesis_local'
 
@@ -73,6 +73,13 @@ def dendro_to_scatter(st: int, pr : int, di : int, sd : str, ed : str, k : int):
     district = di
     start_date = sd
     end_date = ed
+
+    #plotly
+    username = "gustavo_alzamora_2021"
+    apikey = "CSK3qWiFL9D29z8bjBLH"
+
+    chart_studio.tools.set_credentials_file(username=username, api_key=apikey)
+
     #connection
     ssl_args = {'sslrootcert': './server-ca.pem', 'sslcert':'./client-cert.pem', 'sslkey':'client-key.pem'}
     engine = create_engine(database_connection_string,connect_args=ssl_args)
