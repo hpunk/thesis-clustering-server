@@ -25,6 +25,17 @@ def get_clustering_columns():
             'sexual_aggr'
         ]
 
+def generate_query_for_count(start_date,end_date,state,province,district):
+    query = "SELECT clustering_data.id FROM public.clustering_data where "
+    query += "case_date >= '"+start_date+"' and case_date <= '"+end_date+"' "
+    if(district!=0):
+        query += " and district="+str(district)+" "
+    elif(province!=0):
+        query += " and province="+str(province)+" "
+    elif(state!=0):
+        query += " and state="+str(state)+" "
+    return query
+
 def generate_query_for_clustering(start_date,end_date,state,province,district):
     query = "SELECT * FROM public.clustering_data where "
     query += "case_date >= '"+start_date+"' and case_date <= '"+end_date+"' "

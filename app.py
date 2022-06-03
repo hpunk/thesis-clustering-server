@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
-from myutils import distance_function, get_clustering_columns, generate_query_for_clustering, generate_df_with_labels
+from myutils import distance_function, get_clustering_columns, generate_query_for_clustering,generate_query_for_count, generate_df_with_labels
 from sklearn.cluster import DBSCAN,AgglomerativeClustering
 from sklearn_extra.cluster import KMedoids
 from sklearn import manifold
@@ -62,7 +62,7 @@ def count_data_to_cluster(st: int, pr : int, di : int, sd : str, ed : str):
     #connection
     ssl_args = {'sslrootcert': './server-ca.pem', 'sslcert':'./client-cert.pem', 'sslkey':'client-key.pem'}
     engine = create_engine(database_connection_string, connect_args=ssl_args)
-    query = generate_query_for_clustering(start_date,end_date,state,province,district)
+    query = generate_query_for_count(start_date,end_date,state,province,district)
     data_df = pd.read_sql_query(query,con=engine)
     return { 'count' : len(data_df['id']) }
 
